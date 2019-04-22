@@ -261,16 +261,22 @@ Result FsMitmService::OpenBisStorage(Out<std::shared_ptr<IStorageInterface>> out
             const bool is_sysmodule = TitleIdIsSystem(this->title_id);
             const bool has_bis_write_flag = Utils::HasFlag(this->title_id, "bis_write");
             const bool has_cal0_read_flag = Utils::HasFlag(this->title_id, "cal_read");
+            const bool has_cal0_write_flag = Utils::HasFlag(this->title_id, "cal_write");
             if (bis_partition_id == BisStorageId_Boot0) {
                 storage = std::make_shared<IStorageInterface>(new Boot0Storage(bis_storage, this->title_id));
             } else if (bis_partition_id == BisStorageId_Prodinfo) {
                 /* PRODINFO should *never* be writable. */
-                if (is_sysmodule || has_cal0_read_flag) {
-                    storage = std::make_shared<IStorageInterface>(new ROProxyStorage(bis_storage));
+                if (has_cal0_write_flag) {
+                    /*  allow non-sysmodules to write CAL0. dangerous */
+                    storage = std::make_shared<IStorageInterface>(new ProxyStorage(bis_storage));
                 } else {
-                    /* Do not allow non-sysmodules to read *or* write CAL0. */
-                    fsStorageClose(&bis_storage);
-                    return ResultFsPermissionDenied;
+                    /*  allow non-sysmodules to read CAL0. */
+                    if (is_sysmodule || has_cal0_read_flag) {
+                        storage = std::make_shared<IStorageInterface>(new ROProxyStorage(bis_storage));
+                    } else {
+                        /* Do not allow non-sysmodules to read *or* write CAL0. */
+                        fsStorageClose(&bis_storage);
+                    }
                 }
             } else {
                 if (is_sysmodule || has_bis_write_flag) {
