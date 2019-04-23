@@ -13,27 +13,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
 
-struct FatalConfig {
-    char serial_number[0x18];
-    SetSysFirmwareVersion firmware_version;
-    u64 language_code;
-    u64 quest_reboot_interval_second;
-    bool transition_to_fatal;
-    bool show_extra_info;
-    bool quest_flag;
-    const char *error_msg;
-    const char *error_desc;
-    const char *quest_desc;
-    u64 fatal_auto_reboot_interval;
-    bool is_auto_reboot_enabled;
+enum DebugMonitorServiceCmd {
+    Dmnt_Cmd_GetProcessModuleInfo = 0
 };
 
-IEvent *GetFatalSettingsEvent();
-FatalConfig *GetFatalConfig();
-
-void InitializeFatalConfig();
+class DebugMonitorService final : public IServiceObject {
+    private:
+        /* Actual commands. */
+        Result GetProcessModuleInfo(Out<u32> count, OutBuffer<LoaderModuleInfo> out_infos, u64 pid);
+    public:
+        DEFINE_SERVICE_DISPATCH_TABLE {
+            MakeServiceCommandMeta<Dmnt_Cmd_GetProcessModuleInfo, &DebugMonitorService::GetProcessModuleInfo>(),
+        };
+};

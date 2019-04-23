@@ -13,27 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #pragma once
 #include <switch.h>
-#include <stratosphere.hpp>
+#include <cstdio>
 
-struct FatalConfig {
-    char serial_number[0x18];
-    SetSysFirmwareVersion firmware_version;
-    u64 language_code;
-    u64 quest_reboot_interval_second;
-    bool transition_to_fatal;
-    bool show_extra_info;
-    bool quest_flag;
-    const char *error_msg;
-    const char *error_desc;
-    const char *quest_desc;
-    u64 fatal_auto_reboot_interval;
-    bool is_auto_reboot_enabled;
+#include "ro_types.hpp"
+
+class PatchUtils {
+    public:
+        static void ApplyPatches(const ModuleId *module_id, u8 *mapped_nro, size_t mapped_size);
 };
-
-IEvent *GetFatalSettingsEvent();
-FatalConfig *GetFatalConfig();
-
-void InitializeFatalConfig();

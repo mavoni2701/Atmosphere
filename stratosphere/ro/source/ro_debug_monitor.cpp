@@ -14,26 +14,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-#pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+#include <climits>
 
-struct FatalConfig {
-    char serial_number[0x18];
-    SetSysFirmwareVersion firmware_version;
-    u64 language_code;
-    u64 quest_reboot_interval_second;
-    bool transition_to_fatal;
-    bool show_extra_info;
-    bool quest_flag;
-    const char *error_msg;
-    const char *error_desc;
-    const char *quest_desc;
-    u64 fatal_auto_reboot_interval;
-    bool is_auto_reboot_enabled;
-};
+#include "ro_debug_monitor.hpp"
+#include "ro_registration.hpp"
 
-IEvent *GetFatalSettingsEvent();
-FatalConfig *GetFatalConfig();
-
-void InitializeFatalConfig();
+Result DebugMonitorService::GetProcessModuleInfo(Out<u32> count, OutBuffer<LoaderModuleInfo> out_infos, u64 pid) {
+    if (out_infos.num_elements > INT_MAX) {
+        return ResultRoInvalidSize;
+    }
+    return Registration::GetProcessModuleInfo(count.GetPointer(), out_infos.buffer, out_infos.num_elements, pid);
+}

@@ -276,6 +276,8 @@ Result FsMitmService::OpenBisStorage(Out<std::shared_ptr<IStorageInterface>> out
                     } else {
                         /* Do not allow non-sysmodules to read *or* write CAL0. */
                         fsStorageClose(&bis_storage);
+                        rc = ResultFsPermissionDenied;
+                        return rc;
                     }
                 }
             } else {
